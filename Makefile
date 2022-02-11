@@ -1,4 +1,4 @@
-all: run
+all: build run clean
 
 build: codewars.o
 	gcc -o prog codewars.o
@@ -6,7 +6,7 @@ build: codewars.o
 %.o: %.c
 	gcc -g -c $<
 
-run: clean build
+run:
 	./prog
 
 clean:
