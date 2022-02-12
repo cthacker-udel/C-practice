@@ -6,6 +6,6 @@ int sum_digits(int);
 
 void rowWeights(const int[], int, int[]);
 
-cmpFunc(const void *, const void *);
+int cmpFunc(const void *, const void *);
 
-minValues(int *, const size_t);
+int minValues(int *, const size_t);
