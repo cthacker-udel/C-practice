@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 
 void two_oldest_ages(size_t n, const int ages[], int result[2]) {
 
@@ -226,7 +227,8 @@ int isUniqueBackwards(ll one, ll two) {
 int getLongLongBackwards(ll one) {
     char theStr[19];
     sprintf(theStr, "%lli", one);
-    char newStr[strlen(theStr)];
+    const int amt = strlen(theStr);
+    char newStr[amt];
     for (int i = strlen(theStr) - 1, j = 0; i >= 0; i--, j++) {
         newStr[j] = theStr[i];
     }
@@ -343,6 +345,360 @@ char* playPass(char* s, int n) {
     return res;
 }
 
+char *intToBinaryAppend(int number) {
+    char decimal[1];
+    char the_binary[8];
+    int index = 0;
+    while (number > 0) {
+        int result = number % 2;
+        the_binary[index] = result + '0';
+        index++;
+        number /= 2;
+    }
+    char *copy = malloc(sizeof(char) * 9);
+    int length = strlen(the_binary);
+    while (length < 8) {
+        the_binary[length] = '0';
+        length++;
+    }
+    for (int i = 7, j = 0; i >= 0; i--, j++) {
+        copy[j] = the_binary[i];
+    }
+    copy[8] = '\0';
+    return copy;
+}
+
+uint32_t ip_to_uint32(const char *ip) {
+
+    int binaryIndex = 0;
+    char *token;
+    int place = 1;
+    const size_t strLen = strlen(ip);
+    char the_str[strLen];
+    strcpy(the_str, ip);
+    token = strtok(the_str, ".");
+    char *result;
+    char binary[32];
+
+    while (token != NULL) {
+        switch (place) {
+            case 1:
+                result = intToBinaryAppend(strtol(token, (char **)NULL, 10));
+                strcpy(binary, result);
+                break;
+            case 2:
+                result = intToBinaryAppend(strtol(token, (char **)NULL, 10));
+                strcat(binary, result);
+                break;
+            case 3:
+                result = intToBinaryAppend(strtol(token, (char **)NULL, 10));
+                strcat(binary, result);
+                break;
+            case 4:
+                result = intToBinaryAppend(strtol(token, (char **)NULL, 10));
+                strcat(binary, result);
+                break;
+        }
+        token = strtok(NULL, ".");
+        place++;
+    }
+    printf("%s", binary);
+    uint32_t total = 0;
+    for (int i = 31, power = 0; i >= 0; i--, power++) {
+        if (binary[i] == '1') {
+            total += pow(2, power);
+        }
+    }
+    return total;
+
+}
+
+char *rot13(const char *src) {
+
+    printf("Passing : %s\n", src);
+    const int src_len = strlen(src);
+    char cpy_src[src_len];
+    char *lower_alphabet = "abcdefghijklmnopqrstuvwxyz";
+    char *upper_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    int index = 0;
+    strcpy(cpy_src, src);
+    for (int i = 0; i < (int)strlen(src); i++) {
+        char letter = cpy_src[i];
+        if (islower(letter)) {
+            for (int j = 0; j < 26; j++) {
+                if (lower_alphabet[j] == letter) {
+                    int rot_ind = j;
+                    for (int x = 0; x < 13; x++) {
+                        rot_ind++;
+                        if (rot_ind == 26) {
+                            rot_ind = 0;
+                        }
+                    }
+                    cpy_src[i] = lower_alphabet[rot_ind];
+                    break;
+                }
+            }
+        } else if(isupper(letter)) {
+            for (int j = 0; j < 26; j++) {
+                if (upper_alphabet[j] == letter) {
+                    // rotate 13
+                    int rot_ind = j;
+                    for (int x = 0; x < 13; x++) {
+                        rot_ind++;
+                        if (rot_ind == 26) {
+                            rot_ind = 0;
+                        }
+                    }
+                    cpy_src[i] = upper_alphabet[rot_ind];
+                    break;
+                }
+            }
+        }
+    }
+    char *malloced_copy = malloc(sizeof(char) * strlen(cpy_src));
+    strcpy(malloced_copy, cpy_src);
+    return malloced_copy;
+
+}
+
+int compareFunc(const void *a, const void *b) {
+
+    return *(int *)a - *(int *)b;
+
+};
+
+long long next_smaller_number(unsigned long long n) {
+
+    unsigned long long origNumber = n;
+    char number[100];
+    sprintf(number, "%llu", n);
+    char *copy = malloc(sizeof(char) * 2);
+    copy[1] = '\0';
+    int loopVar = 1;
+    int values[100];
+    int index = 0;
+    while (loopVar) {
+        for (int i = strlen(number) - 1; i >= 0; i--) {
+
+            if (i == 0) {
+                // cannot check prev digit, check forward digit
+            } else {
+                int prevDigit, currDigit;
+                copy[0] = number[i - 1];
+                sscanf(copy, "%d", &prevDigit);
+                copy[0] = number[i];
+                sscanf(copy, "%d", &currDigit);
+                if ((prevDigit > currDigit || (currDigit != 0 && prevDigit == 0)) && (currDigit != 0)) {
+                    char tmpDigit = number[i - 1];
+                    number[i - 1] = number[i];
+                    number[i] = tmpDigit;
+                    break;
+                } else if (prevDigit != 0 && currDigit != 0) {
+                    loopVar = 0;
+                    break;
+                }
+                
+            }
+            values[index++] = strtol(number, (char **)NULL, 10);
+
+        }
+    }
+    qsort(values, index + 1, sizeof(int), compareFunc);
+    const int min = values[0];
+    long long result = strtol(number, (char **)NULL, 10);
+    return min != origNumber ? min : -1;
+}
+
+int numPrimeFactors(int number) {
+    int count = 0;
+    for (int i = 0; i <= number / 2; i++) {
+        if (isPrime(i) && number % i == 0) {
+            count++;
+        }
+    }
+    return count;
+}
+// struct node {
+//     int data;
+//     struct node *next;
+// };
+// struct list {
+//     size_t sz;
+//     struct node *head;
+// };
+
+// struct list* createList();
+
+// // push data at the head of the list
+// void insertFirst(struct list* l, int data) {
+//     if (l->head == NULL) {
+//         l->head->data = data;
+//         l->head->next = NULL;
+//     }
+// }
+
+// struct list* reverse(struct list* l);
+
+// void listFree(struct list* l);
+
+// // functions to write
+// struct list* kPrimes(int k, int start, int nd)
+// {
+//     createList();
+//     for (int i = start; i <= nd; i++) {
+//         if (numPrimeFactors(i) == k) {
+
+//         }
+//     }
+// }
+
+int puzzle(int s)
+{
+    // your code
+    return -1;
+}
+
+int numLength(int number) {
+
+    int count = 1;
+    while (number > 9) {
+        number /= 10;
+        count++;
+    }
+    return count;
+
+}
+
+int *up_array(const int *arr, unsigned *count) {
+    
+    int *sub_arr = (int *)malloc(sizeof(int) * *count);
+    for (int i = 0; i < *count; i++) {
+      sub_arr[i] = arr[i];
+    }
+    for (int i = 0; i < *count; i++) {
+      printf("%d, ", sub_arr[i]);
+    }
+    for (int i = 0; i < *count; i++) {
+      if (sub_arr[i] > 9 || sub_arr[i] < 0) {
+        return NULL;
+      }
+    }
+    if(sub_arr[*count - 1] == 9) {
+      for (int i = *count - 1; i >= 0; i--) {
+        if (sub_arr[i] == 9) {
+          if (i == 0) {
+            // found the edge case
+            *count = *count + 1;
+            int *newArr = (int *)malloc(sizeof(int) * (*count + 1));
+            newArr[0] = 1;
+            for (int i = 1; i < *count; i++) {
+              newArr[i] = 0;
+            }
+            return newArr;
+          }
+          sub_arr[i] = 0;
+        } else if (sub_arr[i] < 0 || sub_arr[i] > 9) {
+            return NULL;
+        } else {
+            sub_arr[i] = sub_arr[i] + 1;
+            break;
+        }
+      }
+      return sub_arr;
+    } else if (sub_arr[*count - 1] < 0) {
+        return NULL;
+    } else {
+      sub_arr[(*count) - 1] = sub_arr[(*count) - 1] + 1;
+    }
+    return sub_arr;
+}
+
+// https://www.codewars.com/kata/591f3a2e4e5471989000013d/train/c
+char *parse(const char *source) {
+    
+    const int sourceLen = strlen(source);
+    char sourcecpy[sourceLen];
+    strcpy(sourcecpy, source);
+    char *newLineSplit = strtok(sourcecpy, "\n");
+
+    char newStr[sourceLen];
+    int newStrInd = 0;
+
+    int gotoFound = 0;
+    char number[sourceLen];
+    while (newLineSplit != NULL) {
+
+        if (gotoFound && strstr(newLineSplit, number)) {
+            // found line
+            gotoFound = 0;
+            for(int i = 0, foundSpace = 0; i < strlen(newLineSplit); i++) {
+                if (!foundSpace && newLineSplit[i] == ' ') {
+                    foundSpace = 1;
+                }
+                else if (foundSpace) {
+                    newStr[newStrInd++] = newLineSplit[i];
+                }
+            }
+            newStr[newStrInd++] = ' ';
+            newStr[newStrInd] = '\0';
+        }
+        else if (strstr(newLineSplit, "goto")) {
+            // goto found
+            gotoFound = 1;
+            for (int i = 5, j = 0; i < strlen(newLineSplit); i++, j++) {
+                number[j] = newLineSplit[i];
+                number[j + 1] = '\0';
+            }
+        } else if (!gotoFound) {
+            for(int i = 0, foundSpace = 0; i < strlen(newLineSplit); i++) {
+                if (!foundSpace && newLineSplit[i] == ' ') {
+                    foundSpace = 1;
+                }
+                else if (foundSpace) {
+                    newStr[newStrInd++] = newLineSplit[i];
+                }
+            }
+            newStr[newStrInd++] = ' ';
+            newStr[newStrInd] = '\0';
+        }
+
+        newLineSplit = strtok(NULL, "\n");
+
+    }
+    int len = strlen(newStr);
+    newStr[len - 1] = '\0';
+    char *returnStr = (char *)malloc(sizeof(char) * strlen(newStr));
+    strcpy(returnStr, newStr);
+    return returnStr;
+}
+
+int **multiplication_table(int n) {
+
+    int **table = (int **)malloc(sizeof(int *) * n);
+    int *values = (int *)malloc(sizeof(int) * n * n);
+    int placerInd = 0;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            values[placerInd++] = i * j;
+        }
+    }
+
+    for (int i = 0, j = 0; i < n*n; i += n, j++) {
+        table[j] = &values[i];
+    }
+
+    return table;
+
+}
+
+
 int main(void) {
-    printf("%s", playPass("!24 1!!* !H!!-!FJQQ!!3  !   VDU7! OQL(A 425  BW!E!-H '&*( W90! ! 5!9(!*B", 1));
+    int **result = multiplication_table(3);
+    for (int i = 0; i < 3; i++) {
+        int *row = result[i];
+        for (int j = 0; j < 3; j++) {
+            printf("%d, ", row[i]);
+        }
+        printf("\n");
+    }
 }
