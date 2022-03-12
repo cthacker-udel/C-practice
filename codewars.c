@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 void two_oldest_ages(size_t n, const int ages[], int result[2]) {
 
@@ -691,14 +692,208 @@ int **multiplication_table(int n) {
 
 }
 
+int largest_five_digits(const char *digits)
+{
+    char *substr = malloc(sizeof(char) * 6);
+    memcpy(substr, digits, sizeof(char) * 5);
+    int maxNum = atoi(substr);
+    for (int i = 5; i < strlen(digits); i++) {
+        substr[0] = substr[1];
+        substr[1] = substr[2];
+        substr[2] = substr[3];
+        substr[3] = substr[4];
+        substr[4] = digits[i];
+        int value = atoi(substr);
+        maxNum = value > maxNum ? value : maxNum;
+    }
+    free(substr);
+  return maxNum;
+    
+}
+
+void digitize (uint64_t n, uint8_t digits[], size_t *length_out) {
+
+    int index = *length_out - 1;
+    while (n > 0) {
+        digits[index] = n % 10;
+        n /= 10;
+    }
+
+}
+
+char *double_char (const char *string, char *doubled) {
+
+    doubled = malloc(sizeof(char) * strlen(string) * 2 + 1);
+    for (int i = 0, j = 0; j < strlen(string); j++) {
+        doubled[i++] = string[j];
+        doubled[i++] = string[j];
+    }
+    doubled[strlen(doubled)] = '\0';
+    return doubled;
+}
+
+char *switchItUp(int number) {
+
+    switch(number) {
+        case 0:
+            return "Zero";
+        case 1:
+            return "One";
+        case 2:
+            return "Two";
+        case 3:
+            return "Three";
+        case 4:
+            return "Four";
+        case 5:
+            return "Five";
+        case 6:
+            return "Six";
+        case 7:
+            return "Seven";
+        case 8:
+            return "Eight";
+        case 9:
+            return "Nine";
+        default:
+            return "None";
+    }
+
+
+}
+
+long arr_plus_arr(const int *a, const int *b, size_t na, size_t nb) {
+
+    long total = 0;
+    for (int i = 0, j = 0; i < na; i++, j++) {
+        total += a[j];
+    }
+    for (int i = 0, j = 0; i < nb; i++, j++) {
+        total += b[j];
+    }
+    return total;
+
+}
+
+bool validate_row_col(int *arr) {
+    bool found_elem[] = {false, false, false, false, false, false, false, false, false};
+    for (int i = 0; i < 9; i++) {
+        found_elem[arr[i] - 1] = true;
+    }
+    int tCount = 0;
+    for (int i = 0; i < 9; i++) {
+        if (found_elem[i] == true) {
+            tCount++;
+        }
+    }
+    return tCount == 9;
+}
+
+bool validSolution(unsigned int board[9][9]) {
+
+    // check rows first
+    int row[9];
+    int col[9];
+    for (int i = 0; i < 9; i++) {
+        for (int k = 0; k < 9; k++) {
+            row[k] = board[i][k];
+            col[k] = board[k][i];
+        }
+        bool result = validate_row_col(col) && validate_row_col(row);
+        if (!result) {
+            return false;
+        }
+    }
+    // validated rows and columns
+    // now do 3x3 grids
+    int grid[9];
+    int index = 0;
+    for (int r = 0; r < 9; r += 3) {
+        for (int starter = 0; starter < 9; starter += 3) {
+            for (int i = r; i < r + 3; i++) {
+                for (int j = starter; j < starter + 3; j++) {
+                    grid[index++] = board[i][j];
+                }
+            }
+            bool result = validate_row_col(grid);
+            if (!result) {
+                return false;
+            }
+            index = 0;
+        }
+    }
+    return true;
+    
+
+}
+
+int F(int);
+int M(int);
+
+int M(int n) {
+    if (n == 0) {
+        return 0;
+    } else {
+        return n - F(M(n - 1));
+    }
+}
+
+int F(int n) {
+
+    if (n == 0) {
+        return 1;
+    } else {
+        return n - M(F(n - 1));
+    }
+
+}
+
+enum light {GREEN, YELLOW, RED};
+
+enum light update_light(enum light light) {
+    if (light == GREEN) {
+        return YELLOW;
+    } else if (light == YELLOW) {
+        return RED;
+    } else {
+        return GREEN;
+    }
+}
+
+char *dot(unsigned width, unsigned height) {
+
+    int chars = 6;
+    char *container = (char *)malloc(sizeof(char) * chars);
+    strcpy(container, "");
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+            strcat(container, "+---");
+            chars += 6;
+            container = realloc(container, sizeof(char) * chars);
+        }
+        strcat(container, "+");
+        strcat(container, "\n");
+        // row created, now do inner row
+        for (int w = 0; w < width; w++) {
+            chars += 6;
+            container = realloc(container, sizeof(char) * chars);
+            strcat(container, "| o ");
+        }
+        strcat(container, "|\n");
+    }
+    for (int i = 0; i < width; i++) {
+        strcat(container, "+---");
+        chars += 6;
+        container = realloc(container, sizeof(char) * chars);
+    }
+    strcat(container, "+");
+    container[strlen(container)] = '\0';
+    return container;
+}
+
+
+
 
 int main(void) {
-    int **result = multiplication_table(3);
-    for (int i = 0; i < 3; i++) {
-        int *row = result[i];
-        for (int j = 0; j < 3; j++) {
-            printf("%d, ", row[i]);
-        }
-        printf("\n");
-    }
+        printf("%s",dot(2u, 3u));
 }
