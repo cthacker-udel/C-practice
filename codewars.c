@@ -6,6 +6,9 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <stdbool.h>
+#define ARR_LEN(array) (sizeof(array) / sizeof *(array))
+// #define sample_test_find_multiples(n, limit, expected_array) do_test(n, limit, ARR_LEN(expected_array), expected_array, (uint[ARR_LEN(expected_array)]){0})
+
 
 void two_oldest_ages(size_t n, const int ages[], int result[2]) {
 
@@ -129,9 +132,9 @@ long compareTwoInts(const int *a, const int *b) {
 
 long sum_two_smallest_numbers(size_t n, const int numbers[]) {
 
-    qsort(numbers, n, sizeof(int), compareTwoInts);
-    return ((long long)numbers[0]) + ((long long)numbers[1]);
-
+    // debug, uncomment if need to use qsort(numbers, n, sizeof(int), compareTwoInts);
+    //return ((long long)numbers[0]) + ((long long)numbers[1]);
+    return 1;
 }
 
 typedef struct {
@@ -197,12 +200,11 @@ int isPrime(ll number) {
     if (number < 2) {
         return 1;
     } else {
-        if (number % 2 == 0 || number % 3 == 0 || number % 5 == 0) {
+        if (number == 2 || number == 3 || number == 5) {
+            return 1;
+        } else if (number % 2 == 0 || number % 3 == 0 || number % 5 == 0) {
             return 0;
         } else {
-            if (number == 1095403) {
-                printf("found number \n");
-            }
             for (int i = 2; i <= (sqrt(number) + 1); i++) {
                 if (number % i == 0) {
                     return 0;
@@ -254,7 +256,7 @@ Data* backwardsPrime(ll start, ll end) {
             *(storageArray + (count - 1)) = i;
         }
     }
-    qsort(storageArray, count, sizeof(long long), compareLongLong);
+    // debug, uncomment if need to use qsort(storageArray, count, sizeof(long long), compareLongLong);
     returnData->array = storageArray;
     returnData->sz = count;
     return returnData;
@@ -891,9 +893,518 @@ char *dot(unsigned width, unsigned height) {
     return container;
 }
 
+void evolve(size_t rows, size_t cols, const bool cur_gen[rows][cols], bool next_gen[rows][cols]) {
 
+
+    for (int i = sizeof(bool); i < rows; i++) {
+
+        for (int j = sizeof(bool); j < cols; j++) {
+
+            bool result = cur_gen[i][j];
+            int liveCells = 0;
+            if (i > 0) {
+                liveCells += cur_gen[i - 1][j];
+            }
+            // down
+            if (i < (rows - sizeof(bool))) {
+                liveCells += cur_gen[i + 1][j];
+            }
+            // right
+            if (j < (cols - sizeof(bool))) {
+                liveCells += cur_gen[i][j + 1];
+            }
+            // left
+            if (j > 0) {
+                liveCells += cur_gen[i][j - 1];
+            }
+            // up-left
+            if (i > 0 && j > 0) {
+                liveCells += cur_gen[i - 1][j - 1];
+            }
+            // down-left
+            if (i < (rows - sizeof(bool))) {
+                liveCells += cur_gen[i + 1][j - 1];
+            }
+            // up-right
+            if (i > 0 && j < (cols - sizeof(bool))) {
+                liveCells += cur_gen[i - 1][j + 1];
+            }
+            // down-right
+            if (i < (rows - sizeof(bool)) && j < (cols - sizeof(bool))) {
+                liveCells += cur_gen[i + 1][j + 1];
+            }
+            if (liveCells == 3 && !result) {
+                // cell becomes a live cell
+                next_gen[i][j] = true;
+            } else {
+                if (result) {
+                    if (liveCells < 2) {
+                        next_gen[i][j] = false;
+                    } else if (liveCells > 3) {
+                        next_gen[i][j] = false;
+                    } else if (liveCells == 2 || liveCells == 3) {
+                        next_gen[i][j] = true;
+                    } else {
+                        next_gen[i][j] = cur_gen[i][j];
+                    }
+                } else {
+                    next_gen[i][j] = cur_gen[i][j];
+                }
+            }
+        }
+    }
+};
+
+/// chess moves
+
+#include <stdbool.h>
+#include <stdio.h>
+
+void knight_mark_chessboard(int i, int j, char chessboard_clone[8][8]) {
+    // up-left
+    printf("\nin knight mark\n");
+    if ((i - 2) >= 0 && (j - 1) >= 0) {
+        if (chessboard_clone[i - 2][j - 1] == ' ' || chessboard_clone[i - 2][j - 1] == 'K') {
+            chessboard_clone[i - 2][j - 1] = 'T';
+        }
+    }
+    // up-right
+    if ((i - 2) >= 0 && (j + 1) < 8) {
+        if (chessboard_clone[i - 2][j + 1] == ' ' || chessboard_clone[i - 2][j + 1] == 'K') {
+            chessboard_clone[i - 2][j + 1] = 'T';
+        }
+    }
+    // left-up and left-down
+    if ((i - 1) >= 0 && (j - 2) >= 0) {
+        if (chessboard_clone[i - 1][j - 2] == ' ' || chessboard_clone[i - 1][j - 2] == 'K') {
+            chessboard_clone[i - 1][j - 2] = 'T';
+        }
+    }
+    if ((i + 1) < 8 && (j - 2) >= 0) {
+        if (chessboard_clone[i + 1][j - 2] == ' ' || chessboard_clone[i + 1][j - 2] == 'K') {
+            chessboard_clone[i + 1][j - 2] = 'T';
+        }
+    }
+    // right-up and right-down
+    if ((i - 1) >= 0 && (j + 2) < 8) {
+        if (chessboard_clone[i - 1][j + 2] == ' ' || chessboard_clone[i - 1][j + 2] == 'K') {
+            chessboard_clone[i - 1][j + 2] = 'T';
+        }
+    }
+    if ((i + 1) < 8 && (j + 2) < 8) {
+        if (chessboard_clone[i + 1][j + 2] == ' ' || chessboard_clone[i + 1][j + 2] == 'K') {
+            chessboard_clone[i + 1][j + 2] = 'T';
+        }
+    }
+    // down-left and down-right
+    if ((i + 2) < 8 && (j - 1) >= 0) {
+        if (chessboard_clone[i + 2][j - 1] == ' ' || chessboard_clone[i + 2][j - 1] == 'K') {
+            chessboard_clone[i + 2][j - 1] = 'T';
+        }
+    }
+    if ((i + 2) < 8 && (j + 1) < 8) {
+        if (chessboard_clone[i + 2][j + 1] == ' ' || chessboard_clone[i + 2][j + 1] == 'K') {
+            chessboard_clone[i + 2][j + 1] = 'T';
+        }
+    }
+}
+
+void pawn_mark_chessboard(int i, int j, char chessboard_clone[8][8]) {
+    printf("\nin pawn mark\n");
+    if ((i + 1) < 8 && (j - 1) >= 0) {
+        if (chessboard_clone[i + 1][j - 1] == ' ' || chessboard_clone[i + 1][j - 1] == 'K') {
+            chessboard_clone[i + 1][j - 1] = 'T';
+        }
+    }
+    if ((i + 1) < 8 && (j + 1) < 8) {
+        if (chessboard_clone[i + 1][j + 1] == ' ' || chessboard_clone[i + 1][j + 1] == 'K') {
+            chessboard_clone[i + 1][j + 1] = 'T';
+        }
+    }
+}
+
+void diagonal_mark_chessboard(int i, int j, char chessboard_clone[8][8]) {
+    // diagonal up-left, up-right
+    printf("\nin diagonal mark\n");
+    for (int xru = i, yru = j, xlu = i, ylu = j; (xru >= 0 && yru < 8) || (xlu >= 0 && ylu >= 0); xru--, xlu--, yru++, ylu--) {
+        if (xru >= 0 && yru < 8) {
+            if (chessboard_clone[xru][yru] == ' ' || chessboard_clone[xru][yru] == 'K') {
+                chessboard_clone[xru][yru] = 'T';
+            } else if (xru != i && yru != j && chessboard_clone[xru][yru] != 'T') {
+                xru = -1;
+                yru = 8;
+            }
+        }
+        if (xlu >= 0 && ylu >= 0) {
+            if (chessboard_clone[xlu][ylu] == ' ' || chessboard_clone[xlu][ylu] == 'K') {
+                chessboard_clone[xlu][ylu] = 'T';
+            } else if (xlu != i && ylu != j && chessboard_clone[xlu][ylu] != 'T') {
+                xlu = -1;
+                ylu = -1;
+            }
+        }
+    }
+    for (int xld = i, lld = j, xrd = i, lrd = j; (xld < 8 && lld >= 0) || (xrd < 8 && lrd < 8); xrd++, xld++, lld--, lrd++) {
+        if (xld < 8 && lld >= 0) {
+            if (chessboard_clone[xld][lld] == ' ' || chessboard_clone[xld][lld] == 'K') {
+                chessboard_clone[xld][lld] = 'T';
+            } else if (xld != i && lld != j && chessboard_clone[xld][lld] != 'T') {
+                xld = 8;
+                lld = -1;
+            }
+        }
+        if (xrd < 8 && lrd < 8) {
+            if (chessboard_clone[xrd][lrd] == ' ' || chessboard_clone[xrd][lrd] == 'K') {
+                chessboard_clone[xrd][lrd] = 'T';
+            } else if (xrd != i && lrd != j && chessboard_clone[xrd][lrd] != 'T') {
+                xrd = 8;
+                lrd = 8;
+            }
+        }
+    }
+}
+
+void horizontal_mark_chessboard(int i, int j, char chessboard_clone[8][8]) {
+    printf("\nin horizontal mark\n");
+    for (int xl = j, xr = j; xl >= 0 || xr < 8; xl--, xr++) {
+        if (xl >= 0) {
+            if (chessboard_clone[i][xl] == ' ' || chessboard_clone[i][xl] == 'K') {
+                chessboard_clone[i][xl] = 'T';
+            } else if (xl != j && chessboard_clone[i][xl] != 'T') {
+                xl = -1;
+            }
+        }
+        if (xr < 8) {
+            printf("value = [%c]", chessboard_clone[i][xr]);
+            if (chessboard_clone[i][xr] == ' ' || chessboard_clone[i][xr] == 'K') {
+                chessboard_clone[i][xr] = 'T';
+            } else if (xr != j && chessboard_clone[i][xr] != 'T') {
+                xr = 8;
+            }
+        }
+    }
+}
+
+void vertical_mark_chessboard(int i, int j, char chessboard_clone[8][8]) {
+    for (int xu = i, xd = i; xu >= 0 || xd < 8; xu--, xd++) {
+        if (xu >= 0) {
+            if (chessboard_clone[xu][j] == ' ' || chessboard_clone[xu][j] == 'K') {
+                chessboard_clone[xu][j] = 'T';
+            } else if(xu != i && chessboard_clone[xu][j] != 'T') {
+                xu = -1;
+            }
+        }
+        if (xd < 8) {
+            if (chessboard_clone[xd][j] == ' ' || chessboard_clone[xd][j] == 'K') {
+                chessboard_clone[xd][j] = 'T';
+            } else if (xd != i && chessboard_clone[xd][j] != 'T') {
+                xd = 8;
+            }
+        }
+    }
+}
+
+bool king_is_in_check (const char chessboard[8][8]) {
+
+    char chessboard_clone[8][8];
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            chessboard_clone[i][j] = chessboard[i][j];
+        }
+    }
+  
+    for (int xx = 0; xx < 8; xx++) {
+        printf("[");
+        for (int yy = 0; yy < 8; yy++) {
+          if (yy == 7) {
+            printf("%c", chessboard_clone[xx][yy]);
+          } else {
+            printf("%c, ", chessboard_clone[xx][yy]);
+          }
+        }
+        printf("]\n");
+    }
+
+    int kingX = -1;
+    int kingY = -1;
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (kingX == -1 && chessboard[i][j] == 'K') {
+                kingX = i;
+                kingY = j;
+            }
+        }
+    }
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (kingX == -1 && chessboard[i][j] == 'K') {
+                kingX = i;
+                kingY = j;
+            }
+            char theCurrentPiece = chessboard[i][j];
+            switch (theCurrentPiece) {
+                case 'Q': {
+                    diagonal_mark_chessboard(i, j, chessboard_clone);
+                    vertical_mark_chessboard(i, j, chessboard_clone);
+                    horizontal_mark_chessboard(i, j, chessboard_clone);
+                    break;
+                }
+                case 'B': {
+                    diagonal_mark_chessboard(i, j, chessboard_clone);
+                    break;
+                }
+                case 'N': {
+                    knight_mark_chessboard(i, j, chessboard_clone);
+                    break;
+                }
+                case 'R': {
+                    vertical_mark_chessboard(i, j, chessboard_clone);
+                    horizontal_mark_chessboard(i, j, chessboard_clone);
+                    break;
+                }
+                case 'P': {
+                    pawn_mark_chessboard(i, j, chessboard_clone);
+                    break;
+                }
+            }
+        }
+    }
+    return chessboard_clone[kingX][kingY] == 'T';
+    if (chessboard_clone[kingX][kingY] == 'T') {
+        printf("in first if\n board = \n");
+        for (int xx = 0; xx < 8; xx++) {
+          printf("[");
+          for (int yy = 0; yy < 8; yy++) {
+            if (yy == 7) {
+              printf("%c", chessboard_clone[xx][yy]);
+            } else {
+              printf("%c, ", chessboard_clone[xx][yy]);
+            }
+          }
+          printf("]\n");
+        }
+        return true;
+    } else {
+        printf("\n in else, board = \n");
+        for (int xx = 0; xx < 8; xx++) {
+          printf("[");
+          for (int yy = 0; yy < 8; yy++) {
+            if (yy == 7) {
+              printf("%c", chessboard_clone[xx][yy]);
+            } else {
+              printf("%c, ", chessboard_clone[xx][yy]);
+            }
+          }
+          printf("]\n");
+        }
+        // check all surrounding spaces
+        bool surrounding_check = false;
+        // left
+        printf("\n kingy = %d and kingx = %d\n", kingY, kingX);
+        if (kingY > 0) {
+            if (chessboard_clone[kingX][kingY - 1] == 'T') {
+                surrounding_check = true;
+            } else {
+                return false;
+            }
+        }
+        // right
+        if (kingY < 7) {
+            if (chessboard_clone[kingX][kingY + 1] == 'T') {
+                surrounding_check = true;
+            } else {
+                return false;
+            }
+        }
+        // up
+        if (kingX > 0) {
+            if (chessboard_clone[kingX - 1][kingY] == 'T') {
+                surrounding_check = true;
+            } else {
+                return false;
+            }
+        }
+        // down
+        if (kingX < 7) {
+            if (chessboard_clone[kingX + 1][kingY] == 'T') {
+                surrounding_check = true;
+            } else {
+                return false;
+            }
+        }
+        // up-left
+        if (kingX > 0 && kingY > 0) {
+            if (chessboard_clone[kingX - 1][kingY - 1] == 'T') {
+                surrounding_check = true;
+            } else {
+                return false;
+            }
+        }
+        // up-right
+        if (kingX > 0 && kingY < 7) {
+            if (chessboard_clone[kingX - 1][kingY + 1] == 'T') {
+                surrounding_check = true;
+            } else {
+                return false;
+            }
+        }
+        // down-left
+        if (kingX < 7 && kingY > 0) {
+            if (chessboard_clone[kingX + 1][kingY - 1] == 'T') {
+                surrounding_check = true;
+            } else {
+                return false;
+            }
+        }
+        // down-right
+        if (kingX < 7 && kingY < 7) {
+            if (chessboard_clone[kingX + 1][kingY + 1] == 'T') {
+                surrounding_check = true;
+            } else {
+                return false;
+            }
+        }
+        printf("surroundingcheck = %s\n", surrounding_check ? "true": "false");
+        return surrounding_check;
+    }
+
+};
+
+struct node {
+    int data;
+    struct node *next;
+};
+struct list {
+    size_t sz;
+    struct node *head;
+};
+
+struct list* createList();
+
+// push data at the head of the list
+void insertFirst(struct list* l, int data);
+
+struct list* reverse(struct list* l);
+
+void listFree(struct list* l);
+
+int num_k_prime_factors(int number) {
+
+    int starter = 2;
+    int cnt = 1;
+    while (number > 1 && !isPrime(number)) {
+        if (number % starter == 0 && isPrime(starter)) {
+            while (number % starter == 0) {
+                number /= starter;
+                cnt++;
+            }
+            starter = 2;
+            continue;
+        }
+        starter++;
+    }
+    return cnt;
+
+}
+
+// function to write
+int consecKprimes(int k, struct list* l) {
+    // struct list *primes_list = createList();
+    // struct node *tempHead = l->head;
+    // while (tempHead->next != NULL) {
+    //     int num_factors = num_k_prime_factors(tempHead->data);
+    //     insertFirst(primes_list, num_factors);
+    // }
+    // reverse(primes_list)
+    // struct node *primesHead = primes_list->head;
+    // while (primesHead->next != NULL) {
+        
+    // }
+    return -1;
+}
+
+size_t mag_number(const char *weapon_name, size_t streets) {
+    
+    int totalAmount = ((int)streets) * 3;
+    int mags = 0;
+    if (!strcmp(weapon_name, "PT92")) {
+        while (totalAmount >= 17) {
+            totalAmount -= 17;
+            mags++;
+        }
+        return totalAmount == 0 ? mags : mags + 1;
+    } else if (!strcmp(weapon_name, "M4A1")) {
+        while (totalAmount >= 30) {
+            totalAmount -= 30;
+            mags++;
+        }
+        return totalAmount == 0 ? mags : mags + 1;
+    } else if (!strcmp(weapon_name, "M16A2")) {
+        while (totalAmount >= 30) {
+            totalAmount -= 30;
+            mags++;
+        }
+        return totalAmount == 0 ? mags : mags + 1;
+    } else {
+        while (totalAmount >= 5) {
+            totalAmount -= 5;
+            mags++;
+        }
+        return totalAmount == 0 ? mags : mags + 1;
+    }
+
+}
+
+
+enum parity {EVEN = 0, ODD = 1};
+
+int check_parity(enum parity goal, const char *bitstring) {
+
+    int ones = 0;
+    for (int i = 0; i < strlen(bitstring); i++) {
+        if (bitstring[i] == '1') {
+            ones++;
+        }
+    }
+    if (ones % 2 == 0 && goal == ODD) {
+        return 1;
+    } else if (ones % 2 != 0 && goal == EVEN) {
+        return 1;
+    } else {
+        return 0;
+    }
+
+}
+
+typedef unsigned int uint;
+
+void find_multiples(uint n, uint limit, size_t *count, uint multiples[]) {
+
+    int the_count = 0;
+    int orig_n = n;
+    uint *newArray = malloc(sizeof(uint) * 1);
+    int index = 0;
+    while (n <= limit) {
+        if (n % orig_n == 0) {
+            newArray[index] = n;
+            index++;
+            newArray = realloc(newArray, sizeof(uint) * (index + 1));
+            the_count++;
+        }
+        n += orig_n;
+    }
+    for (int i = 0; i < the_count; i++) {
+        multiples[i] = newArray[i];
+    }
+    free(newArray);
+    *count = the_count;
+
+}
 
 
 int main(void) {
-        printf("%s",dot(2u, 3u));
-}
+    uint arr[] = {5, 10, 15, 20, 25};
+    find_multiples(5, 25, ARR_LEN(arr), arr);
+};
