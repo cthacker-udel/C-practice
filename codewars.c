@@ -1473,7 +1473,6 @@ bool search (int n, const struct node *root)
 }
 
 int same_case(char a, char b) {
-    is
     return (islower(a) && islower(b)) || (isupper(a) && isupper(b));
 
 }
@@ -1492,11 +1491,30 @@ unsigned bin_to_decimal(const char *bin) {
 
 }
 
+int *squareOrSquareRoot(int *array, int length) {
+
+    int *newArray = malloc(sizeof(int) * length);
+    for (int i = 0; i < length; i++) {
+        int value = *(array + i);
+        if (sqrt(value) == floor(sqrt(value))) {
+            // have an int
+            *(newArray + i) = (int)sqrt(value);
+        } else {
+            *(newArray + i) = *(array + i) * *(array + i);
+        }
+    }
+    return newArray;
+
+}
+
 int main(void) {
-    struct node *tree = &(struct node) {
-		666,
-		.left  = &(struct node) {.value = 444},
-		.right = &(struct node) {.value = 555},
-	};
-    printf("right = %d", search(555, tree));
+    int *arr = malloc(sizeof(int) * 4);
+    arr[0] = 10;
+    arr[1] = 20;
+    arr[2] = 9;
+    arr[3] = 16;
+    arr = squareOrSquareRoot(arr, 4);
+    for (int i = 0; i < 4; i++) {
+        printf("arr[%d] = %d\n", i, arr[i]);
+    }
 };
