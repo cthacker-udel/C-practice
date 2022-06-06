@@ -6,9 +6,9 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <float.h>
 #define ARR_LEN(array) (sizeof(array) / sizeof *(array))
 // #define sample_test_find_multiples(n, limit, expected_array) do_test(n, limit, ARR_LEN(expected_array), expected_array, (uint[ARR_LEN(expected_array)]){0})
-
 
 // void two_oldest_ages(size_t n, const int ages[], int result[2]) {
 
@@ -87,12 +87,11 @@
 //       found = 1;
 //     }
 //   }
-  
+
 //   for(int i = 0; i < len; i++) {
 //     printf("%d\n", theSet[i]);
 //   }
 // }
-
 
 // char *remove_url_anchor(const char *url_in) {
 
@@ -500,7 +499,7 @@
 //                     loopVar = 0;
 //                     break;
 //                 }
-                
+
 //             }
 //             values[index++] = strtol(number, (char **)NULL, 10);
 
@@ -573,7 +572,7 @@
 // }
 
 // int *up_array(const int *arr, unsigned *count) {
-    
+
 //     int *sub_arr = (int *)malloc(sizeof(int) * *count);
 //     for (int i = 0; i < *count; i++) {
 //       sub_arr[i] = arr[i];
@@ -618,7 +617,7 @@
 
 // // https://www.codewars.com/kata/591f3a2e4e5471989000013d/train/c
 // char *parse(const char *source) {
-    
+
 //     const int sourceLen = strlen(source);
 //     char sourcecpy[sourceLen];
 //     strcpy(sourcecpy, source);
@@ -710,7 +709,7 @@
 //     }
 //     free(substr);
 //   return maxNum;
-    
+
 // }
 
 // void digitize (uint64_t n, uint8_t digits[], size_t *length_out) {
@@ -760,7 +759,6 @@
 //         default:
 //             return "None";
 //     }
-
 
 // }
 
@@ -825,7 +823,6 @@
 //         }
 //     }
 //     return true;
-    
 
 // }
 
@@ -894,7 +891,6 @@
 // }
 
 // void evolve(size_t rows, size_t cols, const bool cur_gen[rows][cols], bool next_gen[rows][cols]) {
-
 
 //     for (int i = sizeof(bool); i < rows; i++) {
 
@@ -1112,7 +1108,7 @@
 //             chessboard_clone[i][j] = chessboard[i][j];
 //         }
 //     }
-  
+
 //     for (int xx = 0; xx < 8; xx++) {
 //         printf("[");
 //         for (int yy = 0; yy < 8; yy++) {
@@ -1320,13 +1316,13 @@
 //     // reverse(primes_list)
 //     // struct node *primesHead = primes_list->head;
 //     // while (primesHead->next != NULL) {
-        
+
 //     // }
 //     return -1;
 // }
 
 // size_t mag_number(const char *weapon_name, size_t streets) {
-    
+
 //     int totalAmount = ((int)streets) * 3;
 //     int mags = 0;
 //     if (!strcmp(weapon_name, "PT92")) {
@@ -1356,7 +1352,6 @@
 //     }
 
 // }
-
 
 // enum parity {EVEN = 0, ODD = 1};
 
@@ -1462,59 +1457,99 @@
 //     return newUnused;
 // }
 
-struct node {
-	int value;
-	struct node *left, *right;
+struct node
+{
+    int value;
+    struct node *left, *right;
 };
 
-bool search (int n, const struct node *root)
+bool search(int n, const struct node *root)
 {
     return root && (n == root->value || search(n, root->left) || search(n, root->right));
 }
 
-int same_case(char a, char b) {
+int same_case(char a, char b)
+{
     return (islower(a) && islower(b)) || (isupper(a) && isupper(b));
-
 }
 
-unsigned bin_to_decimal(const char *bin) {
+unsigned bin_to_decimal(const char *bin)
+{
 
     unsigned long long theNumber = 0;
     int currPow = 0;
-    for (int i = strlen(bin) - 1; i >= 0; i--) {
-        if (bin[i] == '1') {
+    for (int i = strlen(bin) - 1; i >= 0; i--)
+    {
+        if (bin[i] == '1')
+        {
             theNumber += (unsigned long long)pow(2, currPow);
         }
         currPow++;
     }
     return theNumber;
-
 }
 
-int *squareOrSquareRoot(int *array, int length) {
+int *squareOrSquareRoot(int *array, int length)
+{
 
     int *newArray = malloc(sizeof(int) * length);
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++)
+    {
         int value = *(array + i);
-        if (sqrt(value) == floor(sqrt(value))) {
+        if (sqrt(value) == floor(sqrt(value)))
+        {
             // have an int
             *(newArray + i) = (int)sqrt(value);
-        } else {
+        }
+        else
+        {
             *(newArray + i) = *(array + i) * *(array + i);
         }
     }
     return newArray;
-
 }
 
-int main(void) {
-    int *arr = malloc(sizeof(int) * 4);
-    arr[0] = 10;
-    arr[1] = 20;
-    arr[2] = 9;
-    arr[3] = 16;
-    arr = squareOrSquareRoot(arr, 4);
-    for (int i = 0; i < 4; i++) {
-        printf("arr[%d] = %d\n", i, arr[i]);
+char *safeSqrt(double x)
+{
+
+    if (x < 0)
+    {
+        return "invalid input";
     }
+    else
+    {
+        int len = 0;
+        double rounded = round(sqrt(x));
+        while (rounded > 0)
+        {
+            rounded /= 10;
+            len++;
+        }
+        char *theString = malloc(sizeof(char) * (len + 2));
+        sprintf(theString, "%.1f", sqrt(x));
+        return theString;
+    }
+}
+
+int cmpFunc(const void *a, const void *b)
+{
+    return *((int *)a) - *((int *)b);
+}
+
+void sort_ascending(size_t length, int array[length])
+{
+
+    if (array == NULL || length == 0)
+    {
+        return;
+    }
+    else
+    {
+        qsort(array, (int)length, sizeof(int), cmpFunc);
+    }
+}
+
+int main(void)
+{
+    safeSqrt(1241241241241);
 };
